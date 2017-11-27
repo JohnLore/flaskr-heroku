@@ -1,14 +1,19 @@
 # all the imports
-import sqlite3
+import os
+from urllib import parse
+import psycopg2
 from flask import Flask, request, session, g, redirect, url_for, \
      abort, render_template, flash
 from contextlib import closing
 
 
+parse.uses_netloc.append("postgres")
+url = parse.urlparse(os.environ["DATABASE_URL"])
+
 # configuration
 DATABASE = '/tmp/flaskr.db'
 DEBUG = True
-SECRET_KEY = 'development key'
+SECRET_KEY = '14036874'
 USERNAME = 'admin'
 PASSWORD = 'default'
 
@@ -18,7 +23,14 @@ app.config.from_object(__name__)
 #app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 
 def connect_db():
-    return sqlite3.connect(app.config['DATABASE'])
+    connect = psycopg2.connect(
+        database=url.path[1:],
+        user=url.username,
+        password=url.password,
+        host=url.hostname,
+        port=url.port
+    )
+    return connect
 
 def init_db():
     with closing(connect_db()) as db:
